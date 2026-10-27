@@ -1,29 +1,16 @@
-ANJALI TIWARI — CINEMATIC PORTFOLIO
+ANJALI TIWARI PORTFOLIO — EXTRACTED PHOTO ASSETS
 
-Included features
-- Existing three Anjali portfolio photographs preserved
-- Three.js animated 3D rings and particle environment with reduced-motion and load-failure fallback
-- Responsive portfolio gallery with accessible keyboard-operated lightbox and previous/next navigation
-- Biography and dedicated casting profile
-- Acting/showreel placeholder (no video was supplied, so no fake footage is shown)
-- Enquiry form with client-side validation and a mailto fallback
-- Responsive mobile navigation, Instagram and email links
-- SEO description and Open Graph metadata
+This package contains all 57 photographs extracted individually from IMG_7289.pdf.
+They are optimized JPEGs, named anjali-01.jpg through anjali-57.jpg.
+manifest.json lists the intended website paths and image dimensions.
 
-Preview / local setup
-1. Extract this folder.
-2. Open the folder in VS Code.
-3. Start it with the Live Server extension, or another local static HTTP server.
-4. Open the local URL in a modern browser with internet access. Google Fonts and Three.js load from external CDNs. If Three.js cannot load, the page retains its CSS background and core content.
+Recommended destination in the portfolio1 repository:
+assets/portfolio/
 
-Enquiry form limitation
-The form validates fields and prepares a message in the visitor's email application via mailto. It does not send, store, or track an enquiry. A backend would be needed for direct form submission.
+Next integration:
+1. Upload all 57 JPG files into assets/portfolio/ in the GitHub repository.
+2. Use them as the image sources for the portfolio gallery/lightbox.
+3. Keep the existing hero portrait and website styling; use these as gallery photos.
+4. Review the ordering and choose the strongest image for the hero only if desired.
 
-Before publishing
-- Confirm consent to publish the supplied photographs, biography and email address.
-- Confirm all supplied professional details.
-- Add an approved showreel when one is available.
-- Add a canonical URL only after the final domain is known.
-- Test the mailto workflow and the published site on actual desktop and mobile browsers.
-
-No fake credits, awards, clients, social profiles, or showreel footage are included.
+All files were extracted from the supplied PDF; no photos were generated.
