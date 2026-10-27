@@ -180,8 +180,8 @@ body:after{opacity:.035}
 #portfolio .gallery.sphere-mode .gallery-card[hidden]{display:none!important}
 #portfolio .gallery.sphere-mode.dragging{cursor:grabbing}
 #portfolio .gallery.sphere-mode .gallery-card:focus-visible{outline:2px solid #d4a09a;outline-offset:3px}
-@media(max-width:800px){#portfolio .gallery.sphere-mode{height:570px;min-height:570px}#portfolio .gallery.sphere-mode .gallery-card{width:clamp(76px,17vw,112px);height:clamp(110px,24vw,154px)}#portfolio .gallery.sphere-mode:before{width:85%}}
-@media(max-width:420px){#portfolio .gallery.sphere-mode{height:510px;min-height:510px}#portfolio .gallery.sphere-mode .gallery-card{width:78px;height:112px}}
+@media(max-width:800px){#portfolio .gallery.sphere-mode{height:600px;min-height:600px}#portfolio .gallery.sphere-mode .gallery-card{width:clamp(66px,15vw,100px);height:clamp(94px,21vw,138px)}#portfolio .gallery.sphere-mode:before{width:85%}}
+@media(max-width:420px){#portfolio .gallery.sphere-mode{height:540px;min-height:540px}#portfolio .gallery.sphere-mode .gallery-card{width:64px;height:92px}}
 @media(prefers-reduced-motion:reduce){#portfolio .gallery.sphere-mode .gallery-card{transition:none!important}}
 
 </style>
@@ -349,10 +349,17 @@ const spherePositions = sphereCards.map((card, index) => {
 });
 function renderSphere(){
   if (!sphereMode) return;
-  const radius = Math.min(gallery.clientWidth * (innerWidth <= 600 ? .40 : .37), gallery.clientHeight * .43, 350);
-  spherePositions.forEach(({card, latitude, longitude}, i) => {
+  const compact = innerWidth <= 600;
+  const radius = Math.min(gallery.clientWidth * (compact ? .47 : .43), gallery.clientHeight * (compact ? .43 : .45), compact ? 245 : 410);
+  const cosYaw = Math.cos(sphereYaw), sinYaw = Math.sin(sphereYaw);
+  const cosPitch = Math.cos(spherePitch), sinPitch = Math.sin(spherePitch);
+  spherePositions.forEach(({card, latitude, longitude}) => {
+    const x = Math.sin(latitude) * Math.sin(longitude);
+    const y = -Math.cos(latitude);
+    const z = Math.sin(latitude) * Math.cos(longitude);
+    const rotatedZ = (z * cosYaw - x * sinYaw) * cosPitch - y * sinPitch;
     card.style.transform = 'translate(-50%,-50%) rotateY(' + longitude.toFixed(5) + 'rad) rotateX(' + (latitude - Math.PI/2).toFixed(5) + 'rad) translateZ(' + radius.toFixed(1) + 'px)';
-    card.style.zIndex = String(i + 1);
+    card.style.zIndex = String(Math.round((rotatedZ + 1) * 500));
     card.style.opacity = '1';
     card.style.filter = '';
   });
