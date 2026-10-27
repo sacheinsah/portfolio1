@@ -334,44 +334,77 @@ for (let n = 1; n <= photoCount; n++) {
 }
 
 gallery.append(photoFragment);
-const sphereQuery = matchMedia('(hover: hover) and (pointer: fine)');
-let sphereMode = true, sphereYaw = 0, spherePitch = 0, sphereDragging = false, sphereLastX = 0, sphereLastY = 0, sphereFrame = 0;
+/* True 3D image sphere: each photo sits on the sphere surface and faces outward. */
+let sphereMode = true, sphereYaw = 0, spherePitch = -0.12, sphereDragging = false, sphereLastX = 0, sphereLastY = 0, sphereFrame = 0;
 const sphereCards = [...gallery.querySelectorAll('.gallery-card')];
 const spherePositions = sphereCards.map((card, index) => {
-  const t = (index + .5) / photoCount;
-  const phi = Math.acos(1 - 2*t);
-  const theta = Math.PI * (1 + Math.sqrt(5)) * index;
-  return {card, phi, theta};
+  // Fibonacci sphere distribution keeps all 57 image panels evenly spaced.
+  const t = (index + .5) / sphereCards.length;
+  const latitude = Math.acos(1 - 2 * t);
+  const longitude = Math.PI * (1 + Math.sqrt(5)) * index;
+  return { card, latitude, longitude };
 });
 function renderSphere(){
   if (!sphereMode) return;
-  const radius = Math.min(gallery.clientWidth * (innerWidth <= 600 ? .34 : .32), innerHeight * .37, 330);
-  spherePositions.forEach(({card,phi,theta},i) => {
-    const yaw = theta + sphereYaw;
-    const pitch = phi + spherePitch;
-    const x = radius * Math.sin(pitch) * Math.cos(yaw);
-    const y = radius * Math.cos(pitch);
-    const z = radius * Math.sin(pitch) * Math.sin(yaw);
-    const depth = (z + radius) / (2 * radius);
-    card.style.zIndex = String(Math.round(depth * 1000));
-    card.style.opacity = String(.48 + depth * .52);
-    card.style.filter = 'brightness(' + (.52 + depth * .48) + ')';
-    card.style.transform = 'translate(-50%,-50%) translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,' + z.toFixed(1) + 'px) rotateY(' + (yaw + Math.PI/2) + 'rad) rotateX(' + (Math.PI/2-pitch) + 'rad)';
+  const radius = Math.min(gallery.clientWidth * (innerWidth <= 600 ? .37 : .34), innerHeight * .39, 350);
+  spherePositions.forEach(({card, latitude, longitude}, i) => {
+    // Orient each rectangular photo tangent to the spherical surface.
+    card.style.transform = 'translate(-50%,-50%) rotateY(' + longitude.toFixed(5) + 'rad) rotateX(' + (latitude - Math.PI/2).toFixed(5) + 'rad) translateZ(' + radius.toFixed(1) + 'px)';
+    card.style.zIndex = String(i + 1);
+    card.style.opacity = '1';
+    card.style.filter = '';
   });
+  gallery.style.transform = 'rotateX(' + spherePitch.toFixed(4) + 'rad) rotateY(' + sphereYaw.toFixed(4) + 'rad)';
 }
 function animateSphere(){
   if (!sphereMode || document.hidden || reduced || sphereDragging) { sphereFrame=0; return; }
-  sphereYaw += .0026;
+  sphereYaw += .0028;
   renderSphere();
   sphereFrame=requestAnimationFrame(animateSphere);
 }
-function startSphere(){gallery.classList.add('sphere-mode');sphereMode=true;renderSphere();if(!reduced&&!sphereFrame) sphereFrame=requestAnimationFrame(animateSphere);}
-function stopSphere(){sphereMode=false;gallery.classList.remove('sphere-mode');if(sphereFrame) cancelAnimationFrame(sphereFrame);sphereFrame=0;sphereCards.forEach(card=>{card.style.transform='';card.style.opacity='';card.style.filter='';card.style.zIndex='';});}
-gallery.addEventListener('pointerdown',e=>{if(!sphereMode)return;sphereDragging=true;sphereLastX=e.clientX;sphereLastY=e.clientY;gallery.classList.add('dragging');if(sphereFrame)cancelAnimationFrame(sphereFrame);sphereFrame=0;});
-window.addEventListener('pointermove',e=>{if(!sphereDragging)return;const dx=e.clientX-sphereLastX,dy=e.clientY-sphereLastY;sphereLastX=e.clientX;sphereLastY=e.clientY;sphereYaw+=dx*.006;spherePitch=Math.max(-.65,Math.min(.65,spherePitch+dy*.004));renderSphere();});
-window.addEventListener('pointerup',()=>{if(!sphereDragging)return;sphereDragging=false;gallery.classList.remove('dragging');if(!reduced)sphereFrame=requestAnimationFrame(animateSphere);});
+function startSphere(){
+  sphereMode=true;
+  gallery.classList.add('sphere-mode');
+  renderSphere();
+  if(!reduced&&!sphereFrame) sphereFrame=requestAnimationFrame(animateSphere);
+}
+function stopSphere(){
+  sphereMode=false;
+  gallery.classList.remove('sphere-mode');
+  gallery.style.transform='';
+  if(sphereFrame) cancelAnimationFrame(sphereFrame);
+  sphereFrame=0;
+  sphereCards.forEach(card=>{card.style.transform='';card.style.opacity='';card.style.filter='';card.style.zIndex='';});
+}
+gallery.addEventListener('pointerdown',e=>{
+  if(!sphereMode || e.target.closest('.gallery-card')) {
+    if (!sphereMode) return;
+    // Still allow image selection; only begin dragging when the pointer moves.
+  }
+  if(!sphereMode)return;
+  sphereDragging=true;sphereLastX=e.clientX;sphereLastY=e.clientY;
+  gallery.classList.add('dragging');
+  if(sphereFrame)cancelAnimationFrame(sphereFrame);
+  sphereFrame=0;
+});
+window.addEventListener('pointermove',e=>{
+  if(!sphereDragging)return;
+  const dx=e.clientX-sphereLastX,dy=e.clientY-sphereLastY;
+  sphereLastX=e.clientX;sphereLastY=e.clientY;
+  sphereYaw+=dx*.006;
+  spherePitch=Math.max(-.85,Math.min(.85,spherePitch+dy*.004));
+  renderSphere();
+});
+window.addEventListener('pointerup',()=>{
+  if(!sphereDragging)return;
+  sphereDragging=false;gallery.classList.remove('dragging');
+  if(!reduced)sphereFrame=requestAnimationFrame(animateSphere);
+});
 window.addEventListener('resize',()=>{if(sphereMode)renderSphere();},{passive:true});
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&sphereFrame){cancelAnimationFrame(sphereFrame);sphereFrame=0;}else if(!document.hidden&&sphereMode&&!reduced&&!sphereDragging&&!sphereFrame)sphereFrame=requestAnimationFrame(animateSphere);});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden&&sphereFrame){cancelAnimationFrame(sphereFrame);sphereFrame=0;}
+  else if(!document.hidden&&sphereMode&&!reduced&&!sphereDragging&&!sphereFrame)sphereFrame=requestAnimationFrame(animateSphere);
+});
 startSphere();
 
 if (reduced || !revealObserver) gallery.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
