@@ -162,6 +162,27 @@ body:after{opacity:.035}
 @media(hover:none),(pointer:coarse){#portfolio .gallery-card{transform:none!important;will-change:auto}#portfolio .gallery-card:hover{transform:none;box-shadow:0 12px 30px rgba(0,0,0,.18)}#portfolio .gallery-card:hover img{transform:scale(1.025)}}
 @media(prefers-reduced-motion:reduce){#portfolio .gallery-card,#portfolio .gallery-card img,#portfolio .gallery-filter{transition:none!important;transform:none!important}}
 
+
+/* Complete Portfolio: rotating 3D sphere containing all 57 original photos */
+#portfolio .gallery.sphere-mode{display:block;position:relative;height:clamp(520px,68vw,790px);min-height:520px;perspective:1400px;overflow:hidden;isolation:isolate;border:1px solid rgba(220,185,174,.15);background:radial-gradient(ellipse at 50% 48%,rgba(126,48,56,.18),rgba(9,9,12,.18) 35%,rgba(7,8,10,.92) 72%);touch-action:pan-y;cursor:grab}
+#portfolio .gallery.sphere-mode:before{content:"";position:absolute;left:50%;top:50%;width:min(66%,620px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);border:1px solid rgba(210,170,160,.13);box-shadow:0 0 80px rgba(147,48,56,.10),inset 0 0 70px rgba(147,48,56,.06);pointer-events:none}
+#portfolio .gallery.sphere-mode:after{content:"DRAG TO ROTATE  ·  SELECT A FRAME";position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:4;white-space:nowrap;font:9px "DM Mono",monospace;letter-spacing:.16em;color:#b8a6a1;pointer-events:none}
+#portfolio .gallery.sphere-mode .gallery-card{position:absolute;left:50%;top:50%;width:clamp(78px,10.2vw,138px);height:clamp(112px,14vw,185px);margin:0!important;transform-style:preserve-3d;transform-origin:center;transition:border-color .25s,box-shadow .25s;backface-visibility:visible}
+#portfolio .gallery.sphere-mode .gallery-card img,#portfolio .gallery.sphere-mode .gallery-card:nth-child(2) img{width:100%;height:100%;object-fit:cover;filter:saturate(.85) contrast(1.04);transition:filter .25s,transform .25s}
+#portfolio .gallery.sphere-mode .gallery-card:after{inset:45% 0 0}
+#portfolio .gallery.sphere-mode .gallery-card .card-caption{left:7px;right:7px;bottom:7px;transform:none}
+#portfolio .gallery.sphere-mode .card-caption strong{font-size:9px}
+#portfolio .gallery.sphere-mode .card-caption small{font-size:6px;letter-spacing:.07em;margin-top:3px}
+#portfolio .gallery.sphere-mode .card-caption .number{font-size:7px;padding:2px}
+#portfolio .gallery.sphere-mode .gallery-card:hover{z-index:3;box-shadow:0 0 0 1px #d4a09a,0 14px 35px #000b}
+#portfolio .gallery.sphere-mode .gallery-card:hover img{transform:scale(1.05);filter:saturate(1.08)}
+#portfolio .gallery.sphere-mode .gallery-card[hidden]{display:none!important}
+#portfolio .gallery.sphere-mode.dragging{cursor:grabbing}
+#portfolio .gallery.sphere-mode .gallery-card:focus-visible{outline:2px solid #d4a09a;outline-offset:3px}
+@media(max-width:800px){#portfolio .gallery.sphere-mode{height:570px;min-height:570px}#portfolio .gallery.sphere-mode .gallery-card{width:clamp(76px,17vw,112px);height:clamp(110px,24vw,154px)}#portfolio .gallery.sphere-mode:before{width:85%}}
+@media(max-width:420px){#portfolio .gallery.sphere-mode{height:510px;min-height:510px}#portfolio .gallery.sphere-mode .gallery-card{width:78px;height:112px}}
+@media(prefers-reduced-motion:reduce){#portfolio .gallery.sphere-mode .gallery-card{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -311,7 +332,48 @@ for (let n = 1; n <= photoCount; n++) {
   const badge = document.createElement('span'); badge.className = 'number'; badge.textContent = number;
   info.append(title, small); caption.append(info, badge); card.append(img, caption); photoFragment.append(card);
 }
+
 gallery.append(photoFragment);
+const sphereQuery = matchMedia('(hover: hover) and (pointer: fine)');
+let sphereMode = true, sphereYaw = 0, spherePitch = 0, sphereDragging = false, sphereLastX = 0, sphereLastY = 0, sphereFrame = 0;
+const sphereCards = [...gallery.querySelectorAll('.gallery-card')];
+const spherePositions = sphereCards.map((card, index) => {
+  const t = (index + .5) / photoCount;
+  const phi = Math.acos(1 - 2*t);
+  const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+  return {card, phi, theta};
+});
+function renderSphere(){
+  if (!sphereMode) return;
+  const radius = Math.min(gallery.clientWidth * (innerWidth <= 600 ? .34 : .32), innerHeight * .37, 330);
+  spherePositions.forEach(({card,phi,theta},i) => {
+    const yaw = theta + sphereYaw;
+    const pitch = phi + spherePitch;
+    const x = radius * Math.sin(pitch) * Math.cos(yaw);
+    const y = radius * Math.cos(pitch);
+    const z = radius * Math.sin(pitch) * Math.sin(yaw);
+    const depth = (z + radius) / (2 * radius);
+    card.style.zIndex = String(Math.round(depth * 1000));
+    card.style.opacity = String(.48 + depth * .52);
+    card.style.filter = 'brightness(' + (.52 + depth * .48) + ')';
+    card.style.transform = 'translate(-50%,-50%) translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,' + z.toFixed(1) + 'px) rotateY(' + (yaw + Math.PI/2) + 'rad) rotateX(' + (Math.PI/2-pitch) + 'rad)';
+  });
+}
+function animateSphere(){
+  if (!sphereMode || document.hidden || reduced || sphereDragging) { sphereFrame=0; return; }
+  sphereYaw += .0026;
+  renderSphere();
+  sphereFrame=requestAnimationFrame(animateSphere);
+}
+function startSphere(){gallery.classList.add('sphere-mode');sphereMode=true;renderSphere();if(!reduced&&!sphereFrame) sphereFrame=requestAnimationFrame(animateSphere);}
+function stopSphere(){sphereMode=false;gallery.classList.remove('sphere-mode');if(sphereFrame) cancelAnimationFrame(sphereFrame);sphereFrame=0;sphereCards.forEach(card=>{card.style.transform='';card.style.opacity='';card.style.filter='';card.style.zIndex='';});}
+gallery.addEventListener('pointerdown',e=>{if(!sphereMode)return;sphereDragging=true;sphereLastX=e.clientX;sphereLastY=e.clientY;gallery.classList.add('dragging');if(sphereFrame)cancelAnimationFrame(sphereFrame);sphereFrame=0;});
+window.addEventListener('pointermove',e=>{if(!sphereDragging)return;const dx=e.clientX-sphereLastX,dy=e.clientY-sphereLastY;sphereLastX=e.clientX;sphereLastY=e.clientY;sphereYaw+=dx*.006;spherePitch=Math.max(-.65,Math.min(.65,spherePitch+dy*.004));renderSphere();});
+window.addEventListener('pointerup',()=>{if(!sphereDragging)return;sphereDragging=false;gallery.classList.remove('dragging');if(!reduced)sphereFrame=requestAnimationFrame(animateSphere);});
+window.addEventListener('resize',()=>{if(sphereMode)renderSphere();},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&sphereFrame){cancelAnimationFrame(sphereFrame);sphereFrame=0;}else if(!document.hidden&&sphereMode&&!reduced&&!sphereDragging&&!sphereFrame)sphereFrame=requestAnimationFrame(animateSphere);});
+startSphere();
+
 if (reduced || !revealObserver) gallery.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
 else gallery.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
@@ -335,6 +397,7 @@ if (!reduced && matchMedia('(hover: hover) and (pointer: fine)').matches) {
 const galleryStatus = document.getElementById('gallery-status');
 document.querySelectorAll('.gallery-filter').forEach(button => button.addEventListener('click', () => {
   const filter = button.dataset.filter;
+  if (filter === 'all') startSphere(); else stopSphere();
   document.querySelectorAll('.gallery-filter').forEach(item => { const active = item === button; item.classList.toggle('active', active); item.setAttribute('aria-pressed', String(active)); });
   let visibleCount = 0;
   gallery.querySelectorAll('.gallery-card').forEach(card => { const visible = filter === 'all' || card.dataset.category === filter; card.hidden = !visible; if (visible) visibleCount++; });
