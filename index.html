@@ -164,7 +164,7 @@ body:after{opacity:.035}
 
 
 /* Complete Portfolio: rotating 3D sphere containing all 57 original photos */
-#portfolio .gallery.sphere-mode{display:block;position:relative;height:clamp(520px,68vw,790px);min-height:520px;perspective:1400px;overflow:hidden;isolation:isolate;border:1px solid rgba(220,185,174,.15);background:radial-gradient(ellipse at 50% 48%,rgba(126,48,56,.18),rgba(9,9,12,.18) 35%,rgba(7,8,10,.92) 72%);touch-action:pan-y;cursor:grab}
+#portfolio .gallery.sphere-mode{display:block;position:relative;height:clamp(520px,68vw,790px);min-height:520px;perspective:1400px;transform-style:preserve-3d;overflow:hidden;isolation:isolate;will-change:transform;border:1px solid rgba(220,185,174,.15);background:radial-gradient(ellipse at 50% 48%,rgba(126,48,56,.18),rgba(9,9,12,.18) 35%,rgba(7,8,10,.92) 72%);touch-action:pan-y;cursor:grab}
 #portfolio .gallery.sphere-mode:before{content:"";position:absolute;left:50%;top:50%;width:min(66%,620px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);border:1px solid rgba(210,170,160,.13);box-shadow:0 0 80px rgba(147,48,56,.10),inset 0 0 70px rgba(147,48,56,.06);pointer-events:none}
 #portfolio .gallery.sphere-mode:after{content:"DRAG TO ROTATE  ·  SELECT A FRAME";position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:4;white-space:nowrap;font:9px "DM Mono",monospace;letter-spacing:.16em;color:#b8a6a1;pointer-events:none}
 #portfolio .gallery.sphere-mode .gallery-card{position:absolute;left:50%;top:50%;width:clamp(78px,10.2vw,138px);height:clamp(112px,14vw,185px);margin:0!important;transform-style:preserve-3d;transform-origin:center;transition:border-color .25s,box-shadow .25s;backface-visibility:visible}
