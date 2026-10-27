@@ -129,6 +129,39 @@ body:after{opacity:.035}
 @media(max-width:800px){#portfolio .section-head{padding-bottom:24px}#portfolio .section-intro{max-width:520px}#portfolio .gallery-tools{gap:7px}#portfolio .gallery-filter{padding:10px 11px}}
 @media(max-width:420px){#portfolio h2{font-size:clamp(2.8rem,14vw,4rem)}#portfolio .gallery-filter{font-size:8px;padding:9px 10px}}
 
+
+/* Spotlight gallery — editorial depth and restrained 3D interaction */
+#portfolio{overflow:hidden;background:radial-gradient(ellipse at 50% 0%,rgba(125,43,48,.10),transparent 48%),linear-gradient(180deg,#09090c 0%,#0c0b0e 52%,#08090c 100%)}
+#portfolio .section-head{position:relative}
+#portfolio .section-head:after{content:"57 FRAMES  /  ONE PORTFOLIO";display:block;position:absolute;right:0;top:0;font:9px "DM Mono",monospace;letter-spacing:.17em;color:#827873}
+#portfolio .section h2,#portfolio h2{ text-shadow:0 8px 40px rgba(0,0,0,.24)}
+#portfolio .gallery{perspective:1400px;gap:clamp(12px,1.65vw,23px);align-items:stretch}
+#portfolio .gallery-card{isolation:isolate;position:relative;overflow:hidden;border:1px solid rgba(235,220,211,.14);border-radius:2px;background:linear-gradient(145deg,#1b1719,#09090b);transform:perspective(1100px) rotateX(var(--tilt-y,0deg)) rotateY(var(--tilt-x,0deg)) translateY(var(--lift,0px));transform-style:preserve-3d;will-change:transform;box-shadow:0 12px 30px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.2,.75,.2,1),border-color .35s,box-shadow .35s}
+#portfolio .gallery-card:nth-child(4n+2){margin-top:28px}
+#portfolio .gallery-card:nth-child(4n+3){margin-top:54px}
+#portfolio .gallery-card:nth-child(4n){margin-top:18px}
+#portfolio .gallery-card:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent 24%,transparent 70%,rgba(180,106,99,.08));opacity:.45;transition:opacity .35s}
+#portfolio .gallery-card:after{z-index:1;inset:35% 0 0;background:linear-gradient(180deg,transparent 0%,rgba(7,7,9,.15) 32%,rgba(7,7,9,.88) 100%);transition:opacity .35s}
+#portfolio .gallery-card img{height:clamp(250px,31vw,460px);transform:translateZ(0) scale(1.001);filter:saturate(.78) contrast(1.04);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .5s;backface-visibility:hidden}
+#portfolio .gallery-card:nth-child(2) img{height:clamp(250px,31vw,460px)}
+#portfolio .gallery-card:hover{--lift:-7px;border-color:rgba(218,158,150,.58);box-shadow:0 28px 55px rgba(0,0,0,.45),0 0 0 1px rgba(196,130,123,.08)}
+#portfolio .gallery-card:hover:before{opacity:.9}
+#portfolio .gallery-card:hover img{transform:translateZ(24px) scale(1.065);filter:saturate(1.02) contrast(1.03)}
+#portfolio .card-caption{left:18px;right:18px;bottom:18px;transform:translateZ(32px);text-shadow:0 2px 12px #000;transition:transform .35s}
+#portfolio .card-caption strong{font-size:13px;letter-spacing:.025em}
+#portfolio .card-caption small{font-size:8px;letter-spacing:.14em;color:#d6c5be}
+#portfolio .card-caption .number{border:1px solid rgba(255,255,255,.36);padding:5px 6px;background:rgba(8,8,10,.35);backdrop-filter:blur(8px)}
+#portfolio .gallery-filter{border-radius:2px;background:rgba(255,255,255,.018);transition:transform .25s,border-color .25s,background .25s,color .25s}
+#portfolio .gallery-filter:hover{transform:translateY(-2px);border-color:#bd817b}
+#portfolio .gallery-filter.active{background:#e9dfd8;color:#151214;border-color:#e9dfd8}
+#portfolio .gallery-status{padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+#portfolio .gallery-card[hidden]{display:none!important}
+#portfolio .gallery-card:focus-visible{outline:2px solid #d4a09a;outline-offset:5px}
+@media(max-width:800px){#portfolio .section-head:after{position:static;margin-top:22px}#portfolio .gallery-card:nth-child(n){margin-top:0}#portfolio .gallery-card img,#portfolio .gallery-card:nth-child(2) img{height:clamp(240px,62vw,430px)}#portfolio .gallery-card:hover{--lift:0px}}
+@media(max-width:420px){#portfolio .gallery{gap:11px}#portfolio .gallery-card img,#portfolio .gallery-card:nth-child(2) img{height:112vw;max-height:500px}#portfolio .card-caption{left:12px;right:12px;bottom:12px}}
+@media(hover:none),(pointer:coarse){#portfolio .gallery-card{transform:none!important;will-change:auto}#portfolio .gallery-card:hover{transform:none;box-shadow:0 12px 30px rgba(0,0,0,.18)}#portfolio .gallery-card:hover img{transform:scale(1.025)}}
+@media(prefers-reduced-motion:reduce){#portfolio .gallery-card,#portfolio .gallery-card img,#portfolio .gallery-filter{transition:none!important;transform:none!important}}
+
 </style>
 </head>
 <body>
@@ -281,6 +314,24 @@ for (let n = 1; n <= photoCount; n++) {
 gallery.append(photoFragment);
 if (reduced || !revealObserver) gallery.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
 else gallery.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* Subtle pointer-driven 3D tilt for the 57 spotlight cards; touch and reduced-motion safe. */
+if (!reduced && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  gallery.querySelectorAll('.gallery-card').forEach(card => {
+    card.addEventListener('pointermove', event => {
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width - .5;
+      const y = (event.clientY - rect.top) / rect.height - .5;
+      card.style.setProperty('--tilt-x', (x * 5.5).toFixed(2) + 'deg');
+      card.style.setProperty('--tilt-y', (-y * 5.5).toFixed(2) + 'deg');
+    });
+    card.addEventListener('pointerleave', () => {
+      card.style.setProperty('--tilt-x', '0deg');
+      card.style.setProperty('--tilt-y', '0deg');
+    });
+  });
+}
+
 const galleryStatus = document.getElementById('gallery-status');
 document.querySelectorAll('.gallery-filter').forEach(button => button.addEventListener('click', () => {
   const filter = button.dataset.filter;
