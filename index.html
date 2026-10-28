@@ -353,6 +353,8 @@ function showSpherePhoto(index){
 }
 function startSphere(){
   sphereMode=true;
+  sphereCards.forEach(card=>sphere.appendChild(card));
+  gallery.appendChild(sphere);
   gallery.classList.add('sphere-mode');
   showSpherePhoto(activeSphereIndex);
   if(sphereTimer) clearInterval(sphereTimer);
