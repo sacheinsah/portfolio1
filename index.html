@@ -353,18 +353,24 @@ const spherePositions = sphereCards.map((card, index) => {
 function renderSphere(){
   if (!sphereMode) return;
   const compact = innerWidth <= 600;
-  const radius = Math.min(gallery.clientWidth * (compact ? .46 : .45), gallery.clientHeight * (compact ? .46 : .46), compact ? 245 : 410);
+  // Keep the 3D shell comfortably inside the viewport, while leaving room for
+  // its portrait cards. The gallery itself clips the depth at its edges.
+  const radius = Math.min(gallery.clientWidth * (compact ? .34 : .36), gallery.clientHeight * .32, compact ? 205 : 330);
   const cosYaw = Math.cos(sphereYaw), sinYaw = Math.sin(sphereYaw);
   const cosPitch = Math.cos(spherePitch), sinPitch = Math.sin(spherePitch);
   spherePositions.forEach(({card, latitude, longitude}) => {
     const x = Math.sin(latitude) * Math.sin(longitude);
     const y = -Math.cos(latitude);
     const z = Math.sin(latitude) * Math.cos(longitude);
+    const rotatedX = (x * cosYaw + z * sinYaw);
     const rotatedZ = (z * cosYaw - x * sinYaw) * cosPitch - y * sinPitch;
+    // Rotate the card to face outward from its own point on the shell. Without
+    // the parent/shell transforms, cards were being positioned as if they were
+    // inside-out and could appear detached from the visible circle.
     card.style.transform = 'translate(-50%,-50%) rotateY(' + longitude.toFixed(5) + 'rad) rotateX(' + (latitude - Math.PI/2).toFixed(5) + 'rad) translateZ(' + radius.toFixed(1) + 'px)';
     card.style.zIndex = String(Math.round((rotatedZ + 1) * 500));
-    card.style.opacity = '1';
-    card.style.filter = '';
+    card.style.opacity = String(Math.max(.45, Math.min(1, .6 + (rotatedZ + 1) * .2)));
+    card.style.filter = rotatedZ < -.1 ? 'brightness(.72)' : '';
   });
   sphere.style.transform = 'translate(-50%,-50%) rotateX(' + spherePitch.toFixed(4) + 'rad) rotateY(' + sphereYaw.toFixed(4) + 'rad)';
 }
