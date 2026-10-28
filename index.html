@@ -159,8 +159,8 @@ body:after{opacity:.035}
 #portfolio .gallery-card:focus-visible{outline:2px solid #d4a09a;outline-offset:5px}
 @media(max-width:800px){#portfolio .section-head:after{position:static;margin-top:22px}#portfolio .gallery-card:nth-child(n){margin-top:0}#portfolio .gallery-card img,#portfolio .gallery-card:nth-child(2) img{height:clamp(240px,62vw,430px)}#portfolio .gallery-card:hover{--lift:0px}}
 @media(max-width:420px){#portfolio .gallery{gap:11px}#portfolio .gallery-card img,#portfolio .gallery-card:nth-child(2) img{height:112vw;max-height:500px}#portfolio .card-caption{left:12px;right:12px;bottom:12px}}
-@media(hover:none),(pointer:coarse){#portfolio .gallery-card{transform:none!important;will-change:auto}#portfolio .gallery-card:hover{transform:none;box-shadow:0 12px 30px rgba(0,0,0,.18)}#portfolio .gallery-card:hover img{transform:scale(1.025)}}
-@media(prefers-reduced-motion:reduce){#portfolio .gallery-card,#portfolio .gallery-card img,#portfolio .gallery-filter{transition:none!important;transform:none!important}}
+@media(hover:none),(pointer:coarse){#portfolio .gallery:not(.sphere-mode) .gallery-card{transform:none!important;will-change:auto}#portfolio .gallery:not(.sphere-mode) .gallery-card:hover{transform:none;box-shadow:0 12px 30px rgba(0,0,0,.18)}#portfolio .gallery:not(.sphere-mode) .gallery-card:hover img{transform:scale(1.025)}}
+@media(prefers-reduced-motion:reduce){#portfolio .gallery:not(.sphere-mode) .gallery-card,#portfolio .gallery:not(.sphere-mode) .gallery-card img,#portfolio .gallery-filter{transition:none!important;transform:none!important}#portfolio .gallery.sphere-mode .gallery-card,#portfolio .gallery.sphere-mode .gallery-card img{transition:none!important}}
 
 
 /* True 3D portfolio sphere: all photographs distributed around the whole sphere and rotating automatically. */
