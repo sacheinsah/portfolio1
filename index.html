@@ -378,20 +378,37 @@ for (let n = 1; n <= photoCount; n++) {
   const path = `./anjali-${number}.jpg`;
   const card = document.createElement('article');
   card.className = 'gallery-card reveal';
-  card.tabIndex = 0; card.setAttribute('role', 'button');
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
   card.setAttribute('aria-label', `Open portfolio photograph ${number}`);
-  card.dataset.full = path; card.dataset.category = photoCategory(n);
+  card.dataset.full = path;
+  card.dataset.category = photoCategory(n);
+
   const img = document.createElement('img');
-  img.src = path; img.alt = `Anjali Tiwari portfolio photograph ${number}`;
-  img.loading = n <= 8 ? 'eager' : 'lazy'; img.decoding = 'async';
-  const caption = document.createElement('div'); caption.className = 'card-caption';
-  const info = document.createElement('div'); const title = document.createElement('strong');
+  img.src = path;
+  img.alt = `Anjali Tiwari portfolio photograph ${number}`;
+  img.loading = n <= 12 ? 'eager' : 'lazy';
+  img.decoding = 'async';
+  img.onerror = () => { card.classList.add('image-missing'); };
+
+  const caption = document.createElement('div');
+  caption.className = 'card-caption';
+  const info = document.createElement('div');
+  const title = document.createElement('strong');
   title.textContent = `Portfolio Frame ${number}`;
   const small = document.createElement('small');
   small.textContent = categoryLabels[photoCategory(n)];
-  const badge = document.createElement('span'); badge.className = 'number'; badge.textContent = number;
-  info.append(title, small); caption.append(info, badge); card.append(img, caption)/* True 3D sphere: distribute every portfolio photo over the sphere surface.
-   The shell rotates continuously; touch/pointer dragging changes its orientation. */
+  const badge = document.createElement('span');
+  badge.className = 'number';
+  badge.textContent = number;
+  info.append(title, small);
+  caption.append(info, badge);
+  card.append(img, caption);
+  photoFragment.appendChild(card);
+}
+gallery.appendChild(photoFragment);
+
+/* Distribute every photo across a rotating 3D sphere. */
 let sphereMode = true, sphereYaw = 0, spherePitch = -.12, sphereDragging = false, sphereLastX = 0, sphereLastY = 0, sphereFrame = 0;
 const sphereCards = [...gallery.querySelectorAll('.gallery-card')];
 const sphere = document.createElement('div');
@@ -399,77 +416,76 @@ sphere.className = 'photo-sphere';
 sphere.setAttribute('aria-label', 'All portfolio photographs arranged around a rotating 3D sphere');
 sphereCards.forEach(card => sphere.appendChild(card));
 gallery.appendChild(sphere);
-const spherePositions = sphereCards.map((card,index)=>{
-  const t=(index+.5)/sphereCards.length;
-  return {card,latitude:Math.acos(1-2*t),longitude:Math.PI*(1+Math.sqrt(5))*index};
+const spherePositions = sphereCards.map((card,index) => {
+  const t = (index + .5) / sphereCards.length;
+  return {card, latitude: Math.acos(1 - 2*t), longitude: Math.PI * (1 + Math.sqrt(5)) * index};
 });
-function renderSphere(){
-  if(!sphereMode)return;
-  const compact=innerWidth<=600;
-  const radius=Math.min(gallery.clientWidth*(compact?.34:.36),gallery.clientHeight*.34,compact?205:320);
-  const cy=Math.cos(sphereYaw),sy=Math.sin(sphereYaw),cx=Math.cos(spherePitch),sx=Math.sin(spherePitch);
-  spherePositions.forEach(({card,latitude,longitude})=>{
-    const x=Math.sin(latitude)*Math.sin(longitude);
-    const y=-Math.cos(latitude);
-    const z=Math.sin(latitude)*Math.cos(longitude);
-    const rotatedZ=(z*cy-x*sy)*cx-y*sx;
-    card.style.transform='translate(-50%,-50%) rotateY('+longitude.toFixed(5)+'rad) rotateX('+(latitude-Math.PI/2).toFixed(5)+'rad) translateZ('+radius.toFixed(1)+'px)';
-    card.style.zIndex=String(Math.round((rotatedZ+1)*500));
-    card.style.opacity=String(.48+Math.max(0,rotatedZ)*.52);
-    card.style.filter=rotatedZ<-.15?'brightness(.68)':'';
+function renderSphere() {
+  if (!sphereMode) return;
+  const compact = innerWidth <= 600;
+  const radius = Math.min(gallery.clientWidth * (compact ? .34 : .36), gallery.clientHeight * .34, compact ? 205 : 320);
+  const cy = Math.cos(sphereYaw), sy = Math.sin(sphereYaw), cx = Math.cos(spherePitch), sx = Math.sin(spherePitch);
+  spherePositions.forEach(({card, latitude, longitude}) => {
+    const x = Math.sin(latitude) * Math.sin(longitude);
+    const y = -Math.cos(latitude);
+    const z = Math.sin(latitude) * Math.cos(longitude);
+    const rotatedZ = (z * cy - x * sy) * cx - y * sx;
+    card.style.transform = 'translate(-50%,-50%) rotateY(' + longitude.toFixed(5) + 'rad) rotateX(' + (latitude - Math.PI/2).toFixed(5) + 'rad) translateZ(' + radius.toFixed(1) + 'px)';
+    card.style.zIndex = String(Math.round((rotatedZ + 1) * 500));
+    card.style.opacity = String(.48 + Math.max(0, rotatedZ) * .52);
+    card.style.filter = rotatedZ < -.15 ? 'brightness(.68)' : '';
   });
-  sphere.style.transform='translate(-50%,-50%) rotateX('+spherePitch.toFixed(4)+'rad) rotateY('+sphereYaw.toFixed(4)+'rad)';
+  sphere.style.transform = 'translate(-50%,-50%) rotateX(' + spherePitch.toFixed(4) + 'rad) rotateY(' + sphereYaw.toFixed(4) + 'rad)';
 }
-function animateSphere(){
-  if(!sphereMode||document.hidden||reduced||sphereDragging){sphereFrame=0;return;}
-  sphereYaw+=.003;
+function animateSphere() {
+  if (!sphereMode || document.hidden || reduced || sphereDragging) { sphereFrame = 0; return; }
+  sphereYaw += .003;
   renderSphere();
-  sphereFrame=requestAnimationFrame(animateSphere);
+  sphereFrame = requestAnimationFrame(animateSphere);
 }
-function startSphere(){
-  sphereMode=true;
-  sphereCards.forEach(card=>sphere.appendChild(card));
+function startSphere() {
+  sphereMode = true;
+  sphereCards.forEach(card => sphere.appendChild(card));
   gallery.appendChild(sphere);
   gallery.classList.add('sphere-mode');
   renderSphere();
-  if(!reduced&&!sphereFrame)sphereFrame=requestAnimationFrame(animateSphere);
+  if (!reduced && !sphereFrame) sphereFrame = requestAnimationFrame(animateSphere);
 }
-function stopSphere(){
-  sphereMode=false;
+function stopSphere() {
+  sphereMode = false;
   gallery.classList.remove('sphere-mode');
-  if(sphereFrame)cancelAnimationFrame(sphereFrame);
-  sphereFrame=0;
-  sphere.style.transform='';
-  sphereCards.forEach(card=>{card.style.transform='';card.style.opacity='';card.style.filter='';card.style.zIndex='';});
+  if (sphereFrame) cancelAnimationFrame(sphereFrame);
+  sphereFrame = 0;
+  sphere.style.transform = '';
+  sphereCards.forEach(card => { card.style.transform = ''; card.style.opacity = ''; card.style.filter = ''; card.style.zIndex = ''; });
   gallery.append(...sphereCards);
   sphere.remove();
 }
-gallery.addEventListener('pointerdown',e=>{
-  if(!sphereMode||e.button>0)return;
-  sphereDragging=true;sphereLastX=e.clientX;sphereLastY=e.clientY;
+gallery.addEventListener('pointerdown', e => {
+  if (!sphereMode || e.button > 0) return;
+  sphereDragging = true; sphereLastX = e.clientX; sphereLastY = e.clientY;
   gallery.classList.add('dragging');
-  if(sphereFrame)cancelAnimationFrame(sphereFrame);
-  sphereFrame=0;
+  if (sphereFrame) cancelAnimationFrame(sphereFrame);
+  sphereFrame = 0;
 });
-window.addEventListener('pointermove',e=>{
-  if(!sphereDragging)return;
-  const dx=e.clientX-sphereLastX,dy=e.clientY-sphereLastY;
-  sphereLastX=e.clientX;sphereLastY=e.clientY;
-  sphereYaw+=dx*.006;
-  spherePitch=Math.max(-.85,Math.min(.85,spherePitch+dy*.004));
+window.addEventListener('pointermove', e => {
+  if (!sphereDragging) return;
+  const dx = e.clientX - sphereLastX, dy = e.clientY - sphereLastY;
+  sphereLastX = e.clientX; sphereLastY = e.clientY;
+  sphereYaw += dx * .006;
+  spherePitch = Math.max(-.85, Math.min(.85, spherePitch + dy * .004));
   renderSphere();
 });
-window.addEventListener('pointerup',()=>{
-  if(!sphereDragging)return;
-  sphereDragging=false;gallery.classList.remove('dragging');
-  if(!reduced)sphereFrame=requestAnimationFrame(animateSphere);
+window.addEventListener('pointerup', () => {
+  if (!sphereDragging) return;
+  sphereDragging = false; gallery.classList.remove('dragging');
+  if (!reduced) sphereFrame = requestAnimationFrame(animateSphere);
 });
-window.addEventListener('resize',()=>{if(sphereMode)renderSphere();},{passive:true});
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden&&sphereFrame){cancelAnimationFrame(sphereFrame);sphereFrame=0;}
-  else if(!document.hidden&&sphereMode&&!reduced&&!sphereDragging&&!sphereFrame)sphereFrame=requestAnimationFrame(animateSphere);
+window.addEventListener('resize', () => { if (sphereMode) renderSphere(); }, {passive:true});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && sphereFrame) { cancelAnimationFrame(sphereFrame); sphereFrame = 0; }
+  else if (!document.hidden && sphereMode && !reduced && !sphereDragging && !sphereFrame) sphereFrame = requestAnimationFrame(animateSphere);
 });
-startSphere();
 startSphere();
 
 if (reduced || !revealObserver) gallery.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
