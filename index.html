@@ -181,6 +181,68 @@ body:after{opacity:.035}
 @media(max-width:420px){#portfolio .gallery.sphere-mode{height:540px;min-height:540px}#portfolio .gallery.sphere-mode .gallery-card{width:58px;height:84px}#portfolio .gallery.sphere-mode:after{font-size:7px;letter-spacing:.06em}}
 @media(prefers-reduced-motion:reduce){#portfolio .gallery.sphere-mode .gallery-card{transition:none!important}}
 
+
+/* Final polish: consistent rhythm, accessible controls, and lighter mobile motion */
+:root{scrollbar-color:#393236 #08090c}
+html{scroll-behavior:smooth}
+body{min-width:320px}
+img{color:transparent}
+.topbar{min-height:72px}
+.topbar.scrolled{box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.hero{isolation:isolate}
+.hero-image{background:#111115}
+.btn,.gallery-filter,.menu-toggle,.lightbox button{border-radius:2px}
+.gallery-filter{min-height:42px}
+.gallery-status{line-height:1.7}
+.gallery-card{contain:layout paint}
+.gallery-card img{background:#111115}
+.profile-copy h2{margin-bottom:24px}
+.facts{row-gap:24px}
+.enquiry-form input,.enquiry-form select,.enquiry-form textarea{min-height:48px}
+.enquiry-form select{color-scheme:dark}
+.enquiry-form input::placeholder,.enquiry-form textarea::placeholder{color:#77716e}
+.enquiry-form button{gap:16px}
+.form-note{margin-top:14px}
+.lightbox{z-index:80}
+.lightbox img{object-fit:contain}
+.lightbox-prev,.lightbox-next,.close-lightbox{display:grid;place-items:center}
+.whatsapp-float{z-index:45}
+@media(max-width:800px){
+  .topbar{min-height:64px}
+  .availability{display:none}
+  .nav{z-index:12;max-height:calc(100svh - 86px);overflow:auto}
+  .nav a{padding:7px 0}
+  .hero{min-height:0;padding-bottom:108px}
+  .hero-image-wrap{width:min(72vw,360px);min-width:0}
+  .section{padding-top:76px;padding-bottom:76px}
+  .gallery-card{contain:paint}
+  .lightbox img{max-width:100%;max-height:78svh}
+}
+@media(max-width:480px){
+  .topbar{padding:14px 5vw}
+  .menu-toggle{padding:10px 12px}
+  .hero{gap:28px;padding-left:6vw;padding-right:6vw}
+  .hero-image-wrap{width:min(76vw,330px)}
+  .hero-index,.scroll-cue{bottom:20px}
+  .section{padding-left:6vw;padding-right:6vw}
+  .gallery-tools{align-items:stretch}
+  .gallery-filter{flex:0 1 auto;max-width:100%;line-height:1.5}
+  .contact{padding-left:6vw;padding-right:6vw}
+  .contact-bottom p br{display:none}
+  footer{padding-left:6vw;padding-right:6vw}
+  .lightbox{padding:54px 20px}
+  .lightbox-prev,.lightbox-next{width:38px;height:38px;font-size:23px}
+  .lightbox-prev{left:6px}.lightbox-next{right:6px}
+}
+@media(hover:none),(pointer:coarse){
+  .gallery-card:hover{transform:none}
+  .gallery-card:hover img{transform:none;filter:saturate(.9) contrast(1.02)}
+  .btn:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .whatsapp-float:before{animation:none}
+}
 </style>
 </head>
 <body>
@@ -321,7 +383,7 @@ for (let n = 1; n <= photoCount; n++) {
   card.dataset.full = path; card.dataset.category = photoCategory(n);
   const img = document.createElement('img');
   img.src = path; img.alt = `Anjali Tiwari portfolio photograph ${number}`;
-  img.loading = 'eager'; img.decoding = 'async';
+  img.loading = n <= 8 ? 'eager' : 'lazy'; img.decoding = 'async';
   const caption = document.createElement('div'); caption.className = 'card-caption';
   const info = document.createElement('div'); const title = document.createElement('strong');
   title.textContent = `Portfolio Frame ${number}`;
@@ -481,7 +543,36 @@ if (!reduced) {
     const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
     const canvas = document.getElementById('scene');
     const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    render
+/* Progressive enhancement for navigation and scroll state. */
+const siteHeader = document.querySelector('.topbar');
+const sectionLinks = [...nav.querySelectorAll('a[href^="#"]')];
+const observedSections = sectionLinks.map(link=>document.querySelector(link.getAttribute('href'))).filter(Boolean);
+const updateHeader = () => siteHeader.classList.toggle('scrolled', window.scrollY > 18);
+updateHeader();
+window.addEventListener('scroll', updateHeader, {passive:true});
+if ('IntersectionObserver' in window) {
+  const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      sectionLinks.forEach(link => {
+        if (link.getAttribute('href') === '#' + entry.target.id) link.setAttribute('aria-current','location');
+        else link.removeAttribute('aria-current');
+      });
+    });
+  }, {rootMargin:'-25% 0px -60% 0px', threshold:0});
+  observedSections.forEach(section => sectionObserver.observe(section));
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && nav.classList.contains('open')) {
+    nav.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded','false');
+    menuToggle.querySelector('span').textContent='＋';
+    menuToggle.focus();
+  }
+});
+
+er.setPixelRatio(Math.min(devicePixelRatio, 1.7));
     renderer.setSize(canvas.clientWidth || innerWidth, canvas.clientHeight || innerHeight, false);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, .1, 100);
@@ -492,7 +583,7 @@ if (!reduced) {
     ring.rotation.x = 1.08; ring.rotation.y = -.28; group.add(ring);
     const ring2 = new THREE.Mesh(new THREE.TorusGeometry(4.1,.006,8,180), new THREE.MeshBasicMaterial({color:0xd8c8bf,wireframe:true,transparent:true,opacity:.11}));
     ring2.rotation.x = .85; ring2.rotation.y = .55; group.add(ring2);
-    const particles = new THREE.BufferGeometry(), count = 420, positions = new Float32Array(count*3);
+    const particles = new THREE.BufferGeometry(), count = matchMedia('(max-width: 600px)').matches ? 140 : 320, positions = new Float32Array(count*3);
     for(let i=0;i<count;i++){positions[i*3]=(Math.random()-.5)*22;positions[i*3+1]=(Math.random()-.5)*14;positions[i*3+2]=(Math.random()-.5)*10;}
     particles.setAttribute('position',new THREE.BufferAttribute(positions,3));
     const points = new THREE.Points(particles,new THREE.PointsMaterial({color:0xe8d9d0,size:.025,transparent:true,opacity:.65})); scene.add(points);
