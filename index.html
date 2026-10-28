@@ -543,8 +543,7 @@ if (!reduced) {
     const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
     const canvas = document.getElementById('scene');
     const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-    render
-er.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
     renderer.setSize(canvas.clientWidth || innerWidth, canvas.clientHeight || innerHeight, false);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, .1, 100);
