@@ -284,12 +284,23 @@ img{color:transparent}
   html{scroll-behavior:auto}
   .whatsapp-float:before{animation:none}
 }
+
+/* Refined editorial brand mark */
+.topbar .brand{display:inline-flex;align-items:center;gap:12px;flex-shrink:0;font-size:inherit;font-weight:400;letter-spacing:normal;text-transform:none;line-height:1;color:var(--fg)}
+.brand-mark{width:38px;height:38px;display:block;flex:0 0 38px;color:#e6d9d0;transition:color .25s,transform .25s}
+.brand-mark svg{display:block;width:100%;height:100%}
+.brand:hover .brand-mark{color:#c9827c;transform:translateY(-1px)}
+.brand-wording{display:flex;flex-direction:column;gap:5px}
+.topbar .brand .brand-name{font-family:"Playfair Display",Georgia,serif;font-size:17px;font-weight:500;letter-spacing:.035em;color:#f3f0ec;white-space:nowrap}
+.topbar .brand .brand-role{font:8px "DM Mono",monospace;letter-spacing:.19em;text-transform:uppercase;color:#a6a3a0;white-space:nowrap}
+@media(max-width:420px){.topbar .brand{gap:8px}.brand-mark{width:32px;height:32px;flex-basis:32px}.topbar .brand .brand-name{font-size:15px}.topbar .brand .brand-role{font-size:7px;letter-spacing:.14em}}
+
 </style>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="topbar">
-  <a class="brand" href="#home" aria-label="Anjali Tiwari home">AT<span>.</span></a>
+  <a class="brand" href="#home" aria-label="Anjali Tiwari — home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 44 44" role="presentation"><rect x="1" y="1" width="42" height="42" fill="none" stroke="currentColor" stroke-opacity=".62"/><path d="M9 14h16M17 14v17M23 31l7-17 7 17M26 25h8" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="square" stroke-linejoin="miter"/></svg></span><span class="brand-wording"><span class="brand-name">Anjali Tiwari</span><span class="brand-role">Model&nbsp; / &nbsp;Actor</span></span></a>
   <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu <span>＋</span></button>
   <nav class="nav" id="main-nav" aria-label="Main navigation"><a href="#home">Home</a><a href="#portfolio">Portfolio</a><a href="#about">About</a><a href="#casting">Casting</a><a href="#contact">Contact</a></nav>
   <div class="availability"><i class="dot"></i><span>Available for select projects</span></div>
