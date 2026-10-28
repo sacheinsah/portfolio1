@@ -470,8 +470,6 @@ document.addEventListener('visibilitychange',()=>{
   else if(!document.hidden&&sphereMode&&!reduced&&!sphereDragging&&!sphereFrame)sphereFrame=requestAnimationFrame(animateSphere);
 });
 startSphere();
-wSpherePhoto(activeSphereIndex+(dx<0?1:-1));
-});
 startSphere();
 
 if (reduced || !revealObserver) gallery.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
